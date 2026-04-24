@@ -46,7 +46,7 @@ void check_program_link(GLuint program)
         glGetProgramInfoLog(program, 1024, NULL, infoLog);
         printf("ERROR::PROGRAM_LINKING_ERROR\n%s\n", infoLog);
     }
-}
+} 
 
 
 GLuint create_shader_program(const char* vertexPath, const char* fragmentPath)

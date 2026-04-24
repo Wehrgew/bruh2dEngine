@@ -42,11 +42,11 @@ int main() {
     }
 
     float vertexBuffer[] = {
-        // positions
-        -0.5f, -0.5f, 0.0f,   // нижний левый
-         0.5f, -0.5f, 0.0f,   // нижний правый
-         0.5f,  0.5f, 0.0f,   // верхний правый
-        -0.5f,  0.5f, 0.0f    // верхний левый
+        // positions        //texture pos
+        -0.5f, -0.5f, 0.0f, 0.0f, 0.0f,  // нижний левый
+         0.5f, -0.5f, 0.0f, 1.0f, 0.0f,  // нижний правый
+         0.5f,  0.5f, 0.0f, 1.0f, 1.0f,   // верхний правый
+        -0.5f,  0.5f, 0.0f, 0.0f, 1.0f   // верхний левый
     };
 
     unsigned int indices[] = {
@@ -64,7 +64,11 @@ int main() {
     GLuint vao;
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);    
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
 
     GLuint ebo;
     glGenBuffers(1, &ebo);
