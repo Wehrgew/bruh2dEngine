@@ -1,98 +1,50 @@
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-#include <stdio.h>
-#include "shader.h"
+#include "demo_scene.h"
+#include "engine.h"
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
-    glViewport(0, 0, width, height);
+#include <string.h>
+
+static const char* WINDOW_TITLE = "Test window";
+
+static bool app_init(Engine* engine, void* user_data)
+{
+    (void)engine;
+    return demo_scene_init((DemoScene*)user_data);
 }
 
-int main() {
-    // Инициализация GLFW
-    if (!glfwInit()) {
-        printf("Failed to initialize GLFW\n");
-        return -1;
-    }
+static void app_update(Engine* engine, float delta_time, void* user_data)
+{
+    demo_scene_update((DemoScene*)user_data, engine, delta_time);
+}
 
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+static void app_render(Engine* engine, void* user_data)
+{
+    demo_scene_render((DemoScene*)user_data, engine);
+}
 
-    GLFWwindow* window = glfwCreateWindow(800, 600, "Test window", NULL, NULL);
-    if (!window) {
-        printf("Failed to create GLFW window\n");
-        glfwTerminate();
-        return -1;
-    }
+static void app_shutdown(Engine* engine, void* user_data)
+{
+    (void)engine;
+    demo_scene_shutdown((DemoScene*)user_data);
+}
 
-    glfwMakeContextCurrent(window);
-    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+int main(void)
+{
+    DemoScene scene;
+    memset(&scene, 0, sizeof(scene));
 
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-        printf("Failed to initialize GLAD\n");
-        return -1;
-    }
+    EngineConfig config;
+    config.window_width = 800;
+    config.window_height = 600;
+    config.window_title = WINDOW_TITLE;
+    config.gl_major = 3;
+    config.gl_minor = 3;
+    config.vsync = 1;
 
+    EngineCallbacks callbacks;
+    callbacks.on_init = app_init;
+    callbacks.on_update = app_update;
+    callbacks.on_render = app_render;
+    callbacks.on_shutdown = app_shutdown;
 
-    GLuint shaderProgram = create_shader_program("shaders/vertex.glsl", "shaders/fragment.glsl");
-    if (shaderProgram == 0) {
-        printf("Failed to create shader program!\n");
-        glfwTerminate();
-        return -1;
-    }
-
-    float vertexBuffer[] = {
-        // positions        //texture pos
-        -0.5f, -0.5f, 0.0f, 0.0f, 0.0f,  // нижний левый
-         0.5f, -0.5f, 0.0f, 1.0f, 0.0f,  // нижний правый
-         0.5f,  0.5f, 0.0f, 1.0f, 1.0f,   // верхний правый
-        -0.5f,  0.5f, 0.0f, 0.0f, 1.0f   // верхний левый
-    };
-
-    unsigned int indices[] = {
-        0, 1, 2,   // первый треугольник
-        2, 3, 0    // второй треугольник
-    };
-    
-    GLuint vbo;
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData( 
-        GL_ARRAY_BUFFER, sizeof(vertexBuffer), vertexBuffer, GL_STATIC_DRAW
-    );
-
-    GLuint vao;
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);    
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-
-    GLuint ebo;
-    glGenBuffers(1, &ebo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);    
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-
-    while (!glfwWindowShouldClose(window)) {
-        glfwPollEvents();
-
-        glClearColor(0.1f, 0.1f, 0.2f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
-
-        glUseProgram(shaderProgram);
-        glBindVertexArray(vao);
-        glEnableVertexAttribArray(0);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-        
-
-        glfwSwapBuffers(window);
-    }
-
-    glfwTerminate();
-    return 0;
+    return engine_run(&config, &callbacks, &scene);
 }
