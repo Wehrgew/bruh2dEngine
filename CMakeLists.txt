@@ -18,8 +18,6 @@ target_include_directories(glad PUBLIC external/glad/include)
 add_library(stb INTERFACE)
 target_include_directories(stb INTERFACE external/stb)
 
-# ==================== ИСПОЛНЯЕМЫЙ ФАЙЛ ====================
-
 add_executable(engine
     src/main.c
     src/engine.c
@@ -43,10 +41,6 @@ target_link_libraries(engine PRIVATE
     OpenGL::GL
     m
 )
-
-# ====================== КОПИРОВАНИЕ РЕСУРСОВ ======================
-
-# Шейдеры
 add_custom_target(copy_shaders ALL
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_SOURCE_DIR}/shaders
@@ -54,7 +48,6 @@ add_custom_target(copy_shaders ALL
     COMMENT "Copying GLSL shaders"
 )
 
-# Assets (текстуры)
 add_custom_target(copy_assets ALL
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_SOURCE_DIR}/assets
